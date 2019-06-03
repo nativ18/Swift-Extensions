@@ -1,0 +1,26 @@
+import Foundation
+import UIKit
+
+extension UIImage {
+    
+    func alignOrientationMetadataAndSize() -> UIImage? {
+        let landscapeMetadata = imageOrientation == .left || imageOrientation == .leftMirrored || imageOrientation == .right || imageOrientation == .rightMirrored
+        let landscapeSize = size.width > size.height
+        switch (landscapeSize, landscapeMetadata) {
+        case (false, true), (true, false):
+            var newSize = CGSize(width: size.height, height: size.width)
+            // Trim off the extremely small float value to prevent core graphics from rounding it up
+            newSize.width = floor(newSize.width)
+            newSize.height = floor(newSize.height)
+            UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
+            let context = UIGraphicsGetCurrentContext()!
+            context.translateBy(x: newSize.width/2, y: newSize.height/2)
+            self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return newImage
+        default:
+            return self
+        }
+    }
+}
