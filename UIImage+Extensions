@@ -3,24 +3,33 @@ import UIKit
 
 extension UIImage {
     
-    func alignOrientationMetadataAndSize() -> UIImage? {
-        let landscapeMetadata = imageOrientation == .left || imageOrientation == .leftMirrored || imageOrientation == .right || imageOrientation == .rightMirrored
-        let landscapeSize = size.width > size.height
-        switch (landscapeSize, landscapeMetadata) {
-        case (false, true), (true, false):
-            var newSize = CGSize(width: size.height, height: size.width)
-            // Trim off the extremely small float value to prevent core graphics from rounding it up
-            newSize.width = floor(newSize.width)
-            newSize.height = floor(newSize.height)
-            UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
-            let context = UIGraphicsGetCurrentContext()!
-            context.translateBy(x: newSize.width/2, y: newSize.height/2)
-            self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
-            let newImage = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            return newImage
-        default:
-            return self
+  func alignOrientationMetadataAndSize() -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, self.scale)
+        let context = UIGraphicsGetCurrentContext()!
+        context.translateBy(x: size.width/2, y: size.height/2)
+        self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage
+    }
+    
+    
+    func cropSquare() -> UIImage? {
+        
+        let isLandscape = imageOrientation == .right ||
+            imageOrientation == .left ||
+            imageOrientation == .leftMirrored ||
+            imageOrientation == .rightMirrored
+        
+        var rect: CGRect!
+        
+        let width = isLandscape ? size.height : size.width
+        let height = isLandscape ? size.width : size.height
+        let side = min(width , height) * 3/4
+        rect = CGRect(x: (width - side) / 2, y: (height - side) / 2, width: side, height: side)
+        if let imgRef = cgImage?.cropping(to: rect) {
+            return UIImage(cgImage: imgRef)
         }
+        return nil
     }
 }
