@@ -1,0 +1,41 @@
+
+extension FrameData {
+    
+    // imageBuffers[0].planes contains YUV planes.
+    func convertToCIImage() -> CIImage? {
+        
+        guard imageBuffers.count > 0 || imageBuffers[0].planes.count < 2 else {
+            print("Invalid FrameData! there's no image buffer")
+            return nil
+        }
+        var pixelAttributes: [AnyHashable : [AnyHashable : Any]]? = nil
+        if let kCVPixelBufferIOSurfacePropertiesKey = kCVPixelBufferIOSurfacePropertiesKey as AnyHashable? {
+            pixelAttributes = [
+                kCVPixelBufferIOSurfacePropertiesKey: [:]
+            ]
+        }
+        var pixelBuffer: CVPixelBuffer? = nil
+        
+        let buffer = imageBuffers[0]
+        let width = Int(buffer.width)
+        let height = Int(buffer.height)
+        let yPlaneData = buffer.planes[0].data
+        let uPlaneData = buffer.planes[1].data
+        
+        let result = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, pixelAttributes as CFDictionary?, &pixelBuffer)
+        
+        CVPixelBufferLockBaseAddress(pixelBuffer!, [])
+        let yDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 0)
+        memcpy(yDestPlane, yPlaneData, width * height) //Here y_ch0 is Y-Plane of YUV(NV12) data.
+        let uDestPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 1)
+        memcpy(uDestPlane, uPlaneData, width * height / 2) //Here y_ch1 is UV-Plane of YUV(NV12) data.
+        CVPixelBufferUnlockBaseAddress(pixelBuffer!, [])
+        
+        if result != kCVReturnSuccess {
+            print("Unable to create cvpixelbuffer \(result)")
+            return nil
+        }
+        let coreImage = CIImage(cvPixelBuffer: pixelBuffer!) //CIImage Conversion DONE!!!!
+        return coreImage
+    }
+}
