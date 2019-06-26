@@ -3,7 +3,7 @@ import UIKit
 
 extension UIImage {
     
-  func alignOrientationMetadataAndSize() -> UIImage? {
+  func ignoreOrientationFlag() -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(size, false, self.scale)
         let context = UIGraphicsGetCurrentContext()!
         context.translateBy(x: size.width/2, y: size.height/2)
@@ -12,7 +12,6 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return newImage
     }
-    
     
     func cropSquare() -> UIImage? {
         
@@ -31,5 +30,16 @@ extension UIImage {
             return UIImage(cgImage: imgRef)
         }
         return nil
+    }
+    
+    func resizeImage(newHeight: CGFloat) -> UIImage? {
+        let scale = newHeight / size.height
+        let newWidth = size.width * scale
+        UIGraphicsBeginImageContext(CGSize(width: newWidth, height: newHeight))
+        draw(in: CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
 }
