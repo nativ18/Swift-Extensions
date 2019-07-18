@@ -1,0 +1,100 @@
+
+import Foundation
+
+enum Severity: String {
+    typealias RawValue = String
+    
+    case info = "INFO"
+    case debug = "DEBUG"
+    case warning = "WARNING"
+    case error = "ERROR"
+    
+    var level: Int {
+        switch self {
+        case .debug:
+            return 0
+        case .info:
+            return 1
+        case .warning:
+            return 2
+        case .error:
+            return 3
+        }
+    }
+}
+
+private func prepareMsg(msg: String, severity: Severity, file: String = #file, function: String = #function, line: Int = #line) -> String {
+    let className = file.splitBy("/").last?.splitBy(".").first ?? file
+    let strippedFunction = function.splitBy("(").first ?? function
+    var symbol: String!
+    switch severity {
+    case .info:
+        symbol = "ℹ️"
+    case .debug:
+        symbol = "🐞"
+    case .warning:
+        symbol = "💡💡"
+    case .error:
+        symbol = "👹👹👹"
+    }
+    return "\(symbol!) \(severity.rawValue) ------> [ At: \(CFAbsoluteTimeGetCurrent()) From: \(className):\(strippedFunction):\(line) ]  \(msg)"
+}
+
+public func logStart() {
+    #if DEBUG
+    print("\r\r\r\r\r\r\r\r\r\r\r\r========================== App Start logLevel = \(logLevel) ==============================\r\r\r")
+    #endif
+}
+
+private let logLevel = Severity.debug.level
+
+public func logd(_ msg: String, params: DictionaryType? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    #if DEBUG
+    if Severity.debug.level >= logLevel {
+        print("\r")
+        if let P = params {
+            print("params = \(P)")
+        }
+        print(prepareMsg(msg: msg, severity: .debug, file: file, function: function, line: line))
+    }
+    #endif
+}
+
+public func logi(_ msg: String, params: DictionaryType? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    #if DEBUG
+    if Severity.info.level >= logLevel {
+        print("\r")
+        if let P = params {
+            print("params = \(P)")
+        }
+        print(prepareMsg(msg: msg, severity: .info, file: file, function: function, line: line))
+    }
+    #endif
+}
+
+public func loge(_ msg: String, params: DictionaryType? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    #if DEBUG
+    if Severity.error.level >= logLevel {
+        print("\r\r")
+        Thread.callStackSymbols.forEach{print($0)}
+        print("\r\r\r")
+        if let P = params {
+            print("params = \(P)")
+        }
+        print(prepareMsg(msg: msg, severity: .error, file: file, function: function, line: line))
+    }
+    #endif
+}
+
+public func logw(_ msg: String, params: DictionaryType? = nil, file: String = #file, function: String = #function, line: Int = #line) {
+    #if DEBUG
+    if Severity.warning.level >= logLevel {
+        print("\r\r\r")
+        if let P = params {
+            print("params = \(P)")
+        }
+        print(prepareMsg(msg: msg , severity: .warning, file: file, function: function, line: line))
+    }
+    #endif
+}
+
