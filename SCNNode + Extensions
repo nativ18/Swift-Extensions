@@ -1,0 +1,31 @@
+import ARKit
+
+extension SCNNode {
+
+  func centerPivot(for node: SCNNode) {
+      let min = node.boundingBox.min
+      let max = node.boundingBox.max
+      node.pivot = SCNMatrix4MakeTranslation(
+          min.x + (max.x - min.x)/2,
+          min.y + (max.y - min.y)/2,
+          min.z + (max.z - min.z)/2
+      )
+   }
+ 
+ // Version 1
+ static func addInfrontOfCamera(sceneView: ARSCNNode) -> SCNVector3 {
+    let pointOfView = sceneView.pointOfView // location and orientation of camrea
+    let transform = pointOfView.transform
+    let orientation = SCNVector3(-transform.m31, -transform.m32, -transform.m33) // vector of normal from camera(points to camera), the minus is because the values are opposite(up is minus down is plus).
+    let location = SCNVector3(transform.m41, transform.m42, transform.m43) // location of camera
+    let frontOfCamera = orientation + location
+    return frontOfCamera
+  }
+
+
+ // Version 2
+   static func _addInfrontOfCamera(sceneView: ARSCNNode) -> SCNVector3 {
+      // TODO 
+      // multiple identity matrix with the desire change with the camera transfom
+   }
+ }
