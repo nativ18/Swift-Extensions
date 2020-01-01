@@ -23,6 +23,8 @@ enum Severity: String {
     }
 }
 
+public typealias DictionaryType = [String: Any]
+
 private func prepareMsg(msg: String, severity: Severity, file: String = #file, function: String = #function, line: Int = #line) -> String {
     let className = file.splitBy("/").last?.splitBy(".").first ?? file
     let strippedFunction = function.splitBy("(").first ?? function
@@ -98,3 +100,14 @@ public func logw(_ msg: String, params: DictionaryType? = nil, file: String = #f
     #endif
 }
 
+extension String {
+    
+       func splitBy(_ format: String, trimWhiteSpace: Bool = false) -> [String] {
+           
+           if trimWhiteSpace {
+               
+               return self.trimmingCharacters(in: CharacterSet.whitespaces).components(separatedBy: format)
+           }
+           return self.components(separatedBy: format)
+       }
+}
