@@ -28,4 +28,10 @@ extension SCNNode {
       // TODO 
       // multiple identity matrix with the desire change with the camera transfom
    }
+   
+   func rotateToCamera(scnView: ARSCNNode) {
+   
+        let rotate = simd_float4x4(SCNMatrix4MakeRotation(scnView.session.currentFrame!.camera.eulerAngles.y, 0, 1, 0))
+        simdWorldTransform = simd_mul(simdWorldTransform, rotate)
+     }
  }
